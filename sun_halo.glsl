@@ -1,4 +1,19 @@
 /**
+ * Generate the RGB values corresponding to an orange-blue cosine gradient.
+ *
+ * @param centerDist Distance to origin of normalized coordinates.
+ * @return [R, G, B] vector.
+ */
+vec3 OrangeBluePalette(in float centerDist)
+{
+    vec3 a = vec3(0.500, 0.500, 0.500);
+    vec3 b = vec3(0.500, 0.500, 0.500);
+    vec3 c = vec3(1.00, 0.800, 0.500);
+    vec3 d = vec3(0.000, 0.200, 0.500);
+    return a + b * cos(6.28318 * (c * centerDist + d));
+}
+
+/**
  * Draws a ring shape.
  * 
  * @param centerDist Distance to origin of normalized coordinates.
@@ -36,7 +51,7 @@ float RepeatedRings(in float centerDist, in float frequency, in float thickness_
     float signedDist = sin(centerDist * frequency + animationFactor) / frequency;
     float absDist = abs(signedDist);
     float smoothDist = smoothstep(thickness_px, thickness_px + fade_px, absDist);
-    float invDist = 0.03 / smoothDist;
+    float invDist = 0.025 / smoothDist;
     return invDist;
 }
 
@@ -52,12 +67,12 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 
     // Precomputed useful quantities
     float centerDist = length(normCoord);
-    vec3 colorBalance = vec3(1.0, 1.0, 1.0);
+    vec3 colorBalance = OrangeBluePalette(centerDist); //vec3(3.0, 2.0, 1.0);
 
     // Draw ring
     float ringDist = Ring(centerDist, 0.5, 0.05, 0.0);
 
-    float repeatedRingDist = RepeatedRings(centerDist, 4.0, 0.01, 0.5, true, true);
+    float repeatedRingDist = RepeatedRings(centerDist, 4.0, 0.0, 0.5, true, true);
 
     fragColor = vec4(colorBalance * repeatedRingDist, 1.0);
 //    fragColor = vec4(ringDist, ringDist, 0.0, 1.0);
