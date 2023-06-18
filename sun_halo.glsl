@@ -48,7 +48,7 @@ float RepeatedRings(in float centerDist, in float frequency, in float thickness_
             animationFactor *= -1.0;
         }
     }
-    float signedDist = sin(centerDist * frequency + animationFactor) / frequency;
+    float signedDist = sin(centerDist * frequency + animationFactor * 0.9) / frequency;
     float absDist = abs(signedDist);
     float smoothDist = smoothstep(thickness_px, thickness_px + fade_px, absDist);
     float invDist = 0.025 / smoothDist;
@@ -86,12 +86,16 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
         // Precomputed useful quantities
         float centerDist = length(normCoord);
         float tiledCenterDist = length(tiledCoord);
+        float tiledCenterDistDamped = 1.5 * tiledCenterDist * exp(-centerDist);
 
         // Draw rings
-        float repeatedRingDist = RepeatedRings(tiledCenterDist, 7.0, 0.0, 0.5, true, false);
+        float repeatedRingDist = RepeatedRings(tiledCenterDistDamped, 6.0, 0.0, 0.5, true, false);
+
+        // Enhance contrast
+        repeatedRingDist = pow(repeatedRingDist, 1.15);
 
         // Colors
-        vec3 centerColorWave = OrangeBluePalette(centerDist - iTime * 0.5);
+        vec3 centerColorWave = OrangeBluePalette(centerDist + - iTime * 0.3);
         finalColor += centerColorWave * repeatedRingDist;    
     }
 
