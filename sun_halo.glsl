@@ -1,17 +1,40 @@
 /**
  * Draws a ring shape.
  * 
- * @param normCoord Normalized, centered coordinates of the current pixel.
+ * @param centerDist Distance to origin of normalized coordinates.
  * @param radius_px Ring radius.
  * @param thickness_px Ring thickness.
  * @param fade_px Additional thickness to fade out ring edges.
  * @return Distance to parametrized ring.
  */
-float Ring(float centerDist, in float radius_px, in float thickness_px, in float fade_px)
+float Ring(in float centerDist, in float radius_px, in float thickness_px, in float fade_px)
 {
     float signedDist = centerDist - radius_px;
     float absDist = abs(signedDist);
-    
+    return smoothstep(thickness_px, thickness_px + fade_px, absDist);
+}
+
+/**
+ * Draws repeated concentric rings.
+ *
+ * @param centerDist Distance to origin of normalized coordinates.
+ * @param radius_px Ring radius.
+ * @param thickness_px Ring thickness.
+ * @param fade_px Additional thickness to fade out ring edges.
+ * @param animate Whether to animate the rings moving or not.
+ * @param expand If animating rings, whether to expand or contract them over time.
+ * @return Distance to parametrized rings.
+ */
+float RepeatedRings(in float centerDist, in float frequency, in float thickness_px, in float fade_px, bool animate, bool expand) {
+    float animationFactor = 0.0;
+    if (animate) {
+        animationFactor = iTime;
+        if (expand) {
+            animationFactor *= -1.0;
+        }
+    }
+    float signedDist = sin(centerDist * frequency + animationFactor) / frequency;
+    float absDist = abs(signedDist);
     return smoothstep(thickness_px, thickness_px + fade_px, absDist);
 }
 
@@ -29,8 +52,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     float centerDist = length(normCoord);
 
     // Draw ring
-    float ringDist = Ring(centerDist, 1.0, 0.2, 0.2);
+    float ringDist = Ring(centerDist, 0.5, 0.05, 0.0);
 
-    fragColor = vec4(ringDist, ringDist, 0.0, 1.0);
+    float repeatedRingDist = RepeatedRings(centerDist, 5.0, 0.05, 0.05, true, true);
+
+    fragColor = vec4(repeatedRingDist, repeatedRingDist, 0.0, 1.0);
+//    fragColor = vec4(ringDist, ringDist, 0.0, 1.0);
 
 }
